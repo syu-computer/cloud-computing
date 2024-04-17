@@ -612,12 +612,12 @@ iptables -t filter -I FORWARD -p tcp -d [Apache 서버가 구동중인 가상머
 
 ## 11. libvirt-python으로 가상 머신 생성
 
-### 11-1. 기존 vm1을 destroy 및 undefine
+### 11-1. 기존 vm2을 destroy 및 undefine
 ```bash
-virsh destroy vm1
+virsh destroy vm2
 ```
 ```bash
-virsh undefine vm1
+virsh undefine vm2
 ```
 
 ### 11-2. 가상 머신 상태 확인
