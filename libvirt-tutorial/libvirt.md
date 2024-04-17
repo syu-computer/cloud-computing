@@ -1,9 +1,9 @@
 # Libvirt 실습 가이드
 
-본 문서는 클라우드컴퓨팅 수업의 libvirt 튜토리얼에 대한 실습 가이드입니다.
+본 문서는 클라우드컴퓨팅 수업의 libvirt 튜토리얼에 대한 실습 가이드임.
 
 ## 1. 실습 준비
-실습 시에 원활한 작업을 위해 슈퍼유저 권한을 가지고 로그인합니다.
+* 실습 시에 원활한 작업을 위해 슈퍼유저 권한을 가지고 로그인
 
 ### 1-1. 실습을 위한 권한 설정 (슈퍼유저로 로그인)
 ```bash
@@ -36,7 +36,7 @@ vi vir-network.xml
 ```
 
 ### 2-2. `vi` 에디터가 열리면 입력 모드 `i` 입력 후, 아래의 XML 코드를 입력 및 저장하고 나오기 (`esc 키` -> :`wq`)
-```bash
+```xml
 <network>
   <name>vir-network</name>
   <bridge name="virbr1"/>
@@ -106,7 +106,7 @@ vi user-data
 ```
 
 ### 3-2. `vi` 에디터가 열리면 입력 모드 `i` 입력 후, 아래의 YAML 코드를 입력 및 저장하고 나오기 (`esc 키` -> :`wq`)
-```bash
+```yaml
 #cloud-config
 hostname: vm01
 manage_etc_hosts: true
@@ -130,24 +130,24 @@ chpasswd:
 * `#cloud-config`는 클라우드 컴퓨팅 환경에서 가상 머신(VM) 또는 서버 인스턴스를 초기 설정할 때 사용되는 특수한 주석임
 * `Cloud-init`이 이를 인식하고 실행
 
-### 3-3. 작성된 문서 확인
+### 3-3. `vm1`을 위해 작성된 `user-data` 확인
 ```bash
 cat user-data
 ```
 
-### 3-4. 작성된 문서 복사
+### 3-4. `vm2`을 위해 작성된 `vm1`의 `user-data`를 복사
 ```bash
 cp user-data user-data2
 ```
 
-### 3-5. `vi` 텍스트 에디터를 사용하여 `user-data` 파일을 생성
+### 3-5. `vi` 텍스트 에디터를 사용하여 `user-data2` 파일을 수정
 
 ```bash
 vi user-data2
 ```
 
 ### 3-6. `vi` 에디터가 열리면 입력 모드 `i` 입력 후, 아래 YAML 코드 수정 및 저장하고 나오기 (`esc 키` -> :`wq`)
-```bash
+```yaml
 #cloud-config
 hostname: vm02
 manage_etc_hosts: true
@@ -175,7 +175,7 @@ chpasswd:
 cat user-data2
 ```
 
-### 3-8. user-data를 포함하는 qcow2 이미지 생성
+### 3-8. `vm1`과 `vm2`의 user-data를 각각 포함하는 qcow2 이미지들을 생성
 ```bash
 cloud-localds -v -d qcow2 vm01-base.qcow2 user-data
 ```
@@ -202,12 +202,13 @@ cp focal-server-cloudimg-amd64.img /var/lib/libvirt/images/focal-server-cloudimg
 ```bash
 ls /var/lib/libvirt/images/
 ```
+* 총 4개의 파일이 확인되어야 함.
+
 
 ## 4. 가상 머신 정의 및 시작
 * 가상 머신을 정의하고 시작하는 두 가지 방법이 있음
 1) `virt-install`
 2) `virsh define` & `virsh start `
-
 
 ### 4-1. `virt-install`를 통한 가상 머신 정의 및 시작
 ```bash
@@ -227,7 +228,7 @@ virt-install \
 
 ```
 
-### 4-2. 가상 머신 목록에서 정의된(shut off 상태) 가상 머신 확인
+### 4-2. 가상 머신 목록에서 `running` 상태인 `vm1` 가상 머신 확인
 ```bash
 virsh list --all
 ```
@@ -245,13 +246,13 @@ virsh console vm1
 * Escape character is `Ctrl + ]`
 
 ### 4-6. `vi` 텍스트 에디터를 사용하여 `vm2.xml` 파일을 생성
-
 ```bash
 vi vm2.xml
 ```
+* `vm2`의 정의를 위함
 
 ### 4-7. `vi` 에디터가 열리면 입력 모드 `i` 입력 후, 아래 XML 코드와 같이 입력 및 저장하고 나오기 (`esc 키` -> :`wq`)
-```bash
+```xml
 <domain type='kvm'>
   <name>vm2</name>
   <memory unit='KiB'>2097152</memory>
@@ -289,7 +290,7 @@ vi vm2.xml
 * 가상 머신 이름: `vm2`
 * Ubuntu 디스크 이미지: `/var/lib/libvirt/images/focal-server-cloudimg-amd64-vm02.img`로
 * user-data를 위한 디스크 이미지: `/var/lib/libvirt/images/vm02-base.qcow2`
-* 인터페이스의 mac 주소: `52:54:00:12:34:59`
+* 인터페이스의 mac 주소(mac 주소가 서로 달라야 가상머신 간에 통신 가능): `52:54:00:12:34:59`
 
 ### 4-8. 작성된 문서 확인
 ```bash
@@ -326,6 +327,7 @@ virsh dominfo vm1 && virsh dominfo vm2
 ```bash
 virsh domifaddr vm1 && virsh domifaddr vm2
 ```
+* VM에 할당된 IP는 환경에 따라 다를 수 있음
 
 ### 4-15. 가상 머신 접속
 ```bash
@@ -341,6 +343,7 @@ virsh console vm2
 ping <vm-ip-address>
 ```
 * `<vm-ip-address>`에 상대방 VM의 인터페이스에 할당되어 있는 IP 주소를 기입하여 명령어 실행
+* VM에 할당된 IP는 환경에 따라 다를 수 있음
 * 아래는 실행 결과
 ```bash
 ubuntu@vm02:~$ ping  192.168.123.78
@@ -355,7 +358,6 @@ PING 192.168.123.78 (192.168.123.78) 56(84) bytes of data.
 
 ### 4-18. 가상 머신에서 빠져나오기
 * Escape character is `Ctrl + ]`
-
 
 
 ## 5. 가상 머신의 블록(block)
@@ -394,6 +396,7 @@ virsh domblkstat vm1 vda
 * flush_total_times (Total Time for Flush Operations in nanoseconds): 플러시 연산의 총 처리 시간
 * 요금과 관련된 항목이라 말할 수 있는 항목은 wr_bytes (Write Bytes)와 rd_bytes (Read Bytes) 
 
+
 ## 6. 가상 머신의 일시 중단(suspend) 및 재게(resume) 
 
 ### 6-1. 가상 머신의 일시 중단(suspend)
@@ -412,18 +415,18 @@ virsh list
 virsh resume vm2
 ```
 * resume한 vm의 상태는 running 상태로 변경되어 있음
-* 
+
 ### 6-4. 가상 머신 목록에서 가상 머신 상태 확인
 ```bash
 virsh list
 ```
-* suspend한 vm의 상태는 paused 상태로 변경되어 있음
+* suspend한 vm의 상태는 running 상태로 변경되어 있음
 
 
 ## 7. 가상 머신의 종료(shutdown, destory)와 시작(start)
 
 ### 7-1. 가상 머신의 종료
-* `destroy`: 전원을 갑자기 꺼버리는 것과 유사
+* `destroy`: 전원을 갑자기 꺼버리는 것과 동일함
 * `shutdown`: 가상 머신에게 정상적인 종료를 요청
 ```bash
 virsh destroy vm2
@@ -444,7 +447,7 @@ virsh start vm2
 ```bash
 virsh list
 ```
-* destroy한 vm의 상태는 shut off 상태로 변경되어 있음
+* vm의 상태는 running 상태로 변경되어 있음
 
 
 ## 8. 가상 머신의 스냅샷(Snapshot)
@@ -452,7 +455,6 @@ virsh list
 * 가상 머신의 메모리 상태, 디스크 이미지 및 가상 머신의 상태 정보를 포함
 * 가상 머신의 이전 상태를 저장하므로 가상 머신에서 오류가 발생한 경우 이전 상태로 복원할 수 있음
 * 스냅샷은 가상 머신의 특정 시점에서 생성할 수 있음
-
 
 ### 8-1. 가상 머신의 스냅샷을 커멘드 라인으로 생성
 ```bash
@@ -495,7 +497,7 @@ virsh console vm2
 ```bash
 ls -l
 ```
-* 기존 hello_vm2 파일이 없음을 확인
+* 기존 hello_vm2 파일이 없음을 확인 (`initial-version`의 스냅샷으로 되돌아갔다는 의미임)
   
 ### 8-7. 가상 머신에서 빠져나오기
 * Escape character is `Ctrl + ]`
@@ -509,6 +511,7 @@ virsh snapshot-delete vm2 initial-version
 ```bash
 virsh snapshot-list vm2
 ```
+
 
 ## 9. 가상 머신의 네트워크 구성 확인하기
 
@@ -572,7 +575,7 @@ sudo vi /var/www/html/index.html
 :%d
 ```
 * 명령 모드에서 위 명령을 입력하여 모든 내용을 지움
-```bash
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -602,7 +605,6 @@ iptables -t nat -I PREROUTING -d [우분투의 IP] -p tcp --dport 8080 -j DNAT -
 iptables -t filter -I FORWARD -p tcp -d [Apache 서버가 구동중인 가상머신의 IP] --dport 80 -j ACCEPT
 ```
 * NAT 규칙에 의해 변경된 목적지 주소 (가상 머신의 IP)로 가는 트래픽을 허용함의 의미
-* 아래는 예제
 
 ### 10-3. 윈도우의 웹브라우저에서 아파치 서버 접근하기
 * 윈도우 웹브라우저에서 `[우분투의 IP]:8080` 주소로 접근
@@ -629,7 +631,7 @@ vi script.py
 ```
 
 ### 11-4. `vi` 에디터가 열리면 입력 모드 `i` 입력 후, 아래의 코드를 입력 및 저장하고 나오기 (`esc 키` -> :`wq`)
-```bash
+```python
 import libvirt
 import sys
 
@@ -719,8 +721,8 @@ finally:
 
 ```
 
-## 11-5. 스크립트 실행 및 가상 머신 관리
-* 스크립트를 사용하여 다양한 가상 머신 관리 작업을 수행할 수 있음
+## 11-5. 파이썬 스크립트 실행을 통한 가상 머신 관리
+* 파이썬 스크립트를 사용하여 다양한 가상 머신 관리 작업을 수행할 수 있음
 
 * 가상 머신 생성
 ```bash
