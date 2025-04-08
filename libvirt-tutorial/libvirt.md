@@ -34,6 +34,10 @@ apt update && apt install -y libvirt-clients libvirt-daemon-system virtinst clou
 ```bash
 vi vir-network.xml
 ```
+**vi에서 붙여넣기 모드 설정**: 외부에서 복사한 텍스트를 붙여넣을 때 자동 들여쓰기나 기타 포맷팅(예: 줄 바꿈, 공백 추가 등)이 적용되지 않도록 아래 명령 수행
+```bash
+:set paste
+```
 
 ### 2-2. `vi` 에디터가 열리면 입력 모드 `i` 입력 후, 아래의 XML 코드를 입력 및 저장하고 나오기 (`esc 키` -> :`wq`)
 ```xml
